@@ -1,10 +1,12 @@
 package com.example.clothingsuggester.data
 
+import android.content.Context
 import com.example.clothingsuggester.R
 import com.example.clothingsuggester.data.model.Values
 
 
-class DataManager {
+class DataManager(private val context: Context) {
+    private val clothesSharedPrefrence = ClothesSharedPrefrence(context)
 
 
     fun getWeatherType(values: Values): DayWeatherType {
@@ -13,16 +15,16 @@ class DataManager {
                 DayWeatherType.WINTER
             }
 
-            values.temperature in 15.0..25.0 -> {
+            values.temperature in 15.0..20.0 -> {
+                DayWeatherType.FALL
+            }
+
+            values.temperature in 20.0..35.0 -> {
                 DayWeatherType.SPRING
             }
 
-            values.temperature in 25.0..32.0 -> {
-                DayWeatherType.SUMMER
-            }
-
             else -> {
-                DayWeatherType.FALL
+                DayWeatherType.SUMMER
             }
         }
     }
@@ -83,25 +85,22 @@ class DataManager {
         }
     }
 
-    fun getClothesImageId(dayWeatherType: DayWeatherType): Int {
-        return when (dayWeatherType) {
-            DayWeatherType.WINTER -> {
-                getClothesList(dayWeatherType).random()
-            }
 
-            DayWeatherType.SUMMER -> {
-                getClothesList(dayWeatherType).random()
-            }
+    private fun getNewRandomClothesIndex(dayWeatherType: DayWeatherType): Int {
+        val clothesList = getClothesList(dayWeatherType)
+        val lastChosenIndex = clothesSharedPrefrence.getLastChosenClothesIndex(dayWeatherType)
+        var newIndex = clothesList.random()
 
-            DayWeatherType.SPRING -> {
-                getClothesList(dayWeatherType).random()
-            }
-
-            else -> {
-                getClothesList(dayWeatherType).random()
-            }
+        while (newIndex == lastChosenIndex) {
+            newIndex = clothesList.random()
         }
+
+        clothesSharedPrefrence.saveLastChosenClothesIndex(dayWeatherType, newIndex)
+        return newIndex
     }
 
+    fun getClothesImageId(dayWeatherType: DayWeatherType): Int {
+        return getNewRandomClothesIndex(dayWeatherType)
+    }
 
 }

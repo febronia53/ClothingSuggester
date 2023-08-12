@@ -97,8 +97,8 @@ class MainActivity : AppCompatActivity(), APIManager.MinuteDataCallback {
     }
 
     override fun onMinuteDataReceived(values: Values) {
-        val weatherType = DataManager().getWeatherType(values)
-        val clothesImageId = DataManager().getClothesImageId(weatherType)
+        val weatherType = DataManager(applicationContext).getWeatherType(values)
+        val clothesImageId = DataManager(applicationContext).getClothesImageId(weatherType)
 
         val interval = Interval(values, weatherType, clothesImageId)
 

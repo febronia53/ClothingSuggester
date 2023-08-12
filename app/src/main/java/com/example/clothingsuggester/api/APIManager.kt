@@ -25,7 +25,9 @@ class APIManager {
     fun makeRequestUsingOkhttp(
         latitude: Double,
         longitude: Double,
-        callback: MinuteDataCallback
+        callback: MinuteDataCallback,
+        retryCount: Int = 3, // Maximum number of retries
+        retryDelayMillis: Long = 1000 // Delay in milliseconds before retrying
     ) {
         val url = HttpUrl.Builder().scheme("https").host("api.tomorrow.io")
             .addPathSegments("/v4/weather/forecast")
@@ -45,12 +47,34 @@ class APIManager {
 
                 if (responseBodyString != null) {
                     try {
-                        val result =
-                            Gson().fromJson(responseBodyString, WeatherResponse::class.java)
-                        val minutelyDataList = result.timelines.minutely
+                        println("Response Body: $responseBodyString") // Log the response body
 
-                        val lastestMinuteData = minutelyDataList.first()
-                        callback.onMinuteDataReceived(lastestMinuteData.values)
+                        if (response.code == 429 && retryCount > 0) {
+                            println("Rate limit exceeded. Retrying in $retryDelayMillis ms...")
+                            Thread.sleep(retryDelayMillis)
+                            makeRequestUsingOkhttp(
+                                latitude,
+                                longitude,
+                                callback,
+                                retryCount - 1,
+                                retryDelayMillis
+                            )
+                        } else {
+                            val result = Gson().fromJson(responseBodyString, WeatherResponse::class.java)
+
+                            val timelines = result.timelines
+                            if (timelines != null) {
+                                val minutelyDataList = timelines.minutely
+                                if (minutelyDataList != null && minutelyDataList.isNotEmpty()) {
+                                    val lastestMinuteData = minutelyDataList.first()
+                                    callback.onMinuteDataReceived(lastestMinuteData.values)
+                                } else {
+                                    callback.onAPIError("Minutely data is missing or empty")
+                                }
+                            } else {
+                                callback.onAPIError("Timelines data is missing")
+                            }
+                        }
 
                     } catch (e: JsonSyntaxException) {
                         callback.onAPIError("JSON parsing error: ${e.message}")
@@ -61,4 +85,5 @@ class APIManager {
             }
         })
     }
+
 }
