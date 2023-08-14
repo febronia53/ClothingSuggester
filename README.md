@@ -7,4 +7,5 @@ tools:
 - Shared Preference
 - View Binding
 
-[Screencast from 08-12-2023 10:10:14 PM.webm](https://github.com/febronia53/ClothingSuggester/assets/96552891/cf9b96f3-2766-43a4-a7db-820979c39faf)
+
+[Screencast from 08-14-2023 06:10:15 AM.webm](https://github.com/febronia53/ClothingSuggester/assets/96552891/78d132c6-0849-4ae0-8e84-41e9104842cc)
