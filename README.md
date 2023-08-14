@@ -3,7 +3,8 @@ As a developer u don't have time to pick what to wear everyday, so that's a simp
 
 tools:
 - Kotlin
-- API
+- Rest API
+- OkHTTP3
 - Shared Preference
 - View Binding
 
